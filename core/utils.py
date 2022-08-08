@@ -13,6 +13,8 @@ class Serializer:
             return False, e.messages
 
     @staticmethod
-    def dump(data, schema):
+    def dump(data, schema, extra_args=None):
         data = schema.dump(data)
+        if extra_args:
+            data.update(extra_args)
         return data
