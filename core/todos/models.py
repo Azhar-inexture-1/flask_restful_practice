@@ -35,4 +35,4 @@ class Task(db.Model):
         return None
 
     def __repr__(self):
-        return '<id {}>'.format(self.id)
+        return '<{} (id={})>'.format(type(self).__name__, self.id)

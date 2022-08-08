@@ -23,6 +23,7 @@ class TaskServices:
     @staticmethod
     def get_by_id(id):
         data = Task.get_by_id(id)
+        print(data)
         if data is None:
             return make_response(CONTENT_NOT_FOUND_MESSAGE, HTTPStatus.NOT_FOUND)
         json_response = task_schema.dump(data)
