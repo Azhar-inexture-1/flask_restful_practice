@@ -1,5 +1,6 @@
 from marshmallow import ValidationError
 
+
 class Serializer:
 
     @staticmethod

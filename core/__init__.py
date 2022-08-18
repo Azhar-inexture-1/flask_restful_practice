@@ -5,12 +5,16 @@ from flask_migrate import Migrate
 from flask_marshmallow import Marshmallow
 from flask_jwt_extended import JWTManager
 from flask_bcrypt import Bcrypt
+from authlib.integrations.flask_client import OAuth
+
 
 db = SQLAlchemy()
 migrate = Migrate()
 marshmallow = Marshmallow()
 jwt = JWTManager()
 bcrypt = Bcrypt()
+oauth = OAuth()
+
 
 def create_app(config_class=Config):
     app = Flask(__name__)
@@ -21,7 +25,8 @@ def create_app(config_class=Config):
     marshmallow.init_app(app)
     jwt.init_app(app)
     bcrypt.init_app(app)
-    
+    oauth.init_app(app)
+
     with app.app_context():
 
         from core.todos.routes import tasks_blueprint

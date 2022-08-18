@@ -23,5 +23,16 @@ class RegisterUser(Resource):
     def post(cls):
         return cls.register_service.register()
 
+
+class SocialAuthUser(Resource):
+
+    auth_service = UserServices(request)
+
+    @classmethod
+    def post(cls, name):
+        return cls.auth_service.social_auth(name)
+
+
 users_api.add_resource(RegisterUser, '/register')
+users_api.add_resource(SocialAuthUser, '/social-auth/<string:name>')
 users_api.add_resource(LoginUser, '/login')
