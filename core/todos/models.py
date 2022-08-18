@@ -1,19 +1,33 @@
 from core import db
+from core.users.models import User
+
+
+class TaskList(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    title = db.Column(db.String, nullable=False)
+    user_id = db.Column(db.Integer, db.ForeignKey(User.id))
+    user = db.relationship(User)
 
 
 class Task(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.String(100), nullable=False)
+    title = db.Column(db.String, nullable=False)
+    parent_id = db.Column(db.Integer, db.ForeignKey('task.id'), nullable=True)
+    children = db.relationship("Task",
+                               backref=db.backref('parent', remote_side=[id])
+                               )
+    list_id = db.Column(db.Integer, db.ForeignKey(TaskList.id))
+    list = db.relationship(TaskList)
 
     def __init__(self, data):
-        self.name = data.get('name')
+        self.title = data.get('title')
 
     @classmethod
     def get(cls):
         return cls.query.all()
 
     @classmethod
-    def save(cls, data, *args):
+    def save(cls, data):
         task = cls(data)
         db.session.add(task)
         db.session.commit()

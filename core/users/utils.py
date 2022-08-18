@@ -25,12 +25,11 @@ def normalize_userinfo(data):
 def get_github_data(client):
     response = {}
     resp = client.get('https://api.github.com/user/emails')
+    email = None
     for data in resp.json():
         if data['primary']:
             email = data['email']
             break
-    else:
-        email = None
     response['email'] = email
     return response
 

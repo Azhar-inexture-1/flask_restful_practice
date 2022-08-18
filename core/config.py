@@ -24,8 +24,15 @@ GITHUB_CLIENT_SECRET = os.environ.get('GITHUB_CLIENT_SECRET')
 
 class Config:
     SQLALCHEMY_DATABASE_URI = f"postgresql://{username}:{password}@{host}:{port}/{database}"
+
+    PROPAGATE_EXCEPTIONS = True
+    JWT_TOKEN_LOCATION = ['headers']
+    JWT_HEADER_NAME = 'Authorization'
+    JWT_HEADER_TYPE = 'Bearer'
+
     EXPIRE_TIME_FOR_ACCESS_TOKEN_IN_MINUTES = 1440
     EXPIRE_TIME_FOR_REFRESH_TOKEN_IN_HOURS = 720
+
     SECRET_KEY = SECRET_KEY
 
     GOOGLE_CLIENT_ID = GOOGLE_CLIENT_ID

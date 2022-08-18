@@ -44,7 +44,9 @@ class UserServices:
                 data = get_github_data(client)
             else:
                 resp = client.get(user_info_url[name], params={'skip_status': True})
-                data = normalize_userinfo(resp.json())
+                data = {
+                    'email': resp.json().get('email'),
+                }
 
         is_valid, data_or_errors = Serializer.load(data, social_auth_user_schema)
         if is_valid:
