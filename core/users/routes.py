@@ -1,6 +1,6 @@
 from flask import Blueprint, request
 from flask_restful import Api, Resource
-from .services import UserServices
+from core.users.services import UserServices
 
 users_blueprint = Blueprint('users', __name__)
 users_api = Api(users_blueprint)

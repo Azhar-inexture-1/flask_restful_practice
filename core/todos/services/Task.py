@@ -1,7 +1,7 @@
 from core.constants import CONTENT_NOT_FOUND_MESSAGE, DELETE_SUCCESSFUL_MESSAGE
-from .schemas import TaskSchema
+from core.todos.schemas import TaskSchema
 from core.utils import Serializer
-from .models import Task
+from core.todos.models import Task
 from flask import make_response
 from http import HTTPStatus
 
@@ -23,7 +23,6 @@ class TaskServices:
     @staticmethod
     def get_by_id(id):
         data = Task.get_by_id(id)
-        print(data)
         if data is None:
             return make_response(CONTENT_NOT_FOUND_MESSAGE, HTTPStatus.NOT_FOUND)
         json_response = task_schema.dump(data)
@@ -31,8 +30,9 @@ class TaskServices:
 
     def create(self):
         data = self.request.get_json(silent=True)
+        print(data)
         is_valid, data_or_errors = Serializer.load(data, task_schema)
-        
+        print(is_valid)
         if is_valid:
             response = Task.save(data_or_errors)
             json_response = task_schema.dump(response)
