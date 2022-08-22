@@ -16,6 +16,16 @@ class User(db.Model):
 
     @classmethod
     def save(cls, data):
+        """
+        Creates and saves model object.
+        Parameter
+        ---------
+        data: Python Dictionary
+            key refers to the attribute of models.
+        Return
+        ------
+        model object
+        """
         user = cls(data)
         db.session.add(user)
         db.session.commit()
@@ -23,14 +33,33 @@ class User(db.Model):
 
     @classmethod
     def save_social(cls, data):
+        """
+        Creates and saves model object when user selects social oauth service.
+        Parameter
+        ---------
+        data: Python Dictionary
+            key refers to the attribute of models.
+        Return
+        ------
+        model object
+        """
         user = cls(data, social=True)
         db.session.add(user)
         db.session.commit()
         return user
 
     @classmethod
-    def get_user_by_email(cls, value):
-        return cls.query.filter_by(email=value).first()
+    def get_user_by_email(cls, email):
+        """
+        This method fetch user by email.
+        Parameter
+        ---------
+        email: email of user
+        return
+        ------
+        model object or None.
+        """
+        return cls.query.filter_by(email=email).first()
 
     def __repr__(self):
         return '<{} (id: {})>'.format(type(self).__name__, self.id)
@@ -50,6 +79,20 @@ class OAuth(db.Model):
 
     @classmethod
     def social_auth(cls, data, provider):
+        """
+        Handles social auth, returns proper responses for user request.
+        Creates user if social auth is connected for the first time.
+        Parameter
+        ---------
+        data: Python Dict
+            key pair values of user information.
+        provider: string
+            name of the oauth provider.
+            example: "google", "github", "twitter" etc.
+        return
+        ------
+        Status true or false, message, model object or none
+        """
         email = data.get('email')
         user = User.query.filter_by(email=email).first()
         if user is not None:

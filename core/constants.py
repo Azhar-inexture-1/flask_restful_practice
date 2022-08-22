@@ -10,3 +10,9 @@ MSG_LOG_IN_SUCCESSFULLY = "Successfully Logged in."
 ERR_PASSWORD_INCORRECT = {"message": "Password incorrect."}
 ERR_USER_WITH_EMAIL_NOT_EXISTS = {"message": "There is no user with given email"}
 ERR_USER_NOT_EXISTS= {"message": "user with is {} is not exsits"}
+
+#social auth
+USER_INFO_URL = {
+    'google': 'https://openidconnect.googleapis.com/v1/userinfo',
+    'twitter': 'https://api.twitter.com/1.1/account/verify_credentials.json?include_email=true'
+}

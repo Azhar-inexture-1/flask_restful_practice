@@ -1,6 +1,6 @@
 from core.constants import (
     ERR_PASSWORD_INCORRECT, ERR_USER_WITH_EMAIL_NOT_EXISTS,
-    MSG_LOG_IN_SUCCESSFULLY
+    MSG_LOG_IN_SUCCESSFULLY, USER_INFO_URL
     )
 from .oauth import oauth
 from .schemas import UserSchema, UserRequestSchema, SocialAuthUserSchema
@@ -8,7 +8,7 @@ from core.utils import Serializer
 from .models import User, OAuth
 from flask import make_response
 from http import HTTPStatus
-from .utils import Hasher, user_info_url, get_github_data
+from .utils import Hasher
 from .jwt_utils import JWTAuthentication
 from flask_jwt_extended import get_jwt_identity
 
@@ -25,6 +25,9 @@ class UserServices:
         self.request = request
 
     def register(self):
+        """
+        Registers new user using information and password.
+        """
         data = self.request.get_json(force=True, silent=True)
         is_valid, data_or_errors = Serializer.load(data, user_schema)
         
@@ -36,15 +39,34 @@ class UserServices:
         return make_response(data_or_errors, HTTPStatus.BAD_REQUEST)
 
     def social_auth(self, name):
+        """
+        This function handles social logins.
+        Parameter
+        ---------
+        name: String
+            Name of the oauth provider
+            example: "google", "twitter", etc.
+        """
         client = oauth.create_client(name)
         token = self.request.get_json(force=True, silent=True).get('token')
+        if token is None:
+            return make_response({
+                "message": "Token is required"
+            }, HTTPStatus.BAD_REQUEST)
         client.token = token
         user = token.get('userinfo')
+        data = {}
         if not user:
             if name == 'github':
-                data = get_github_data(client)
+                resp = client.get('https://api.github.com/user/emails')
+                email = None
+                for data in resp.json():
+                    if data['primary']:
+                        email = data['email']
+                        break
+                data['email'] = email
             else:
-                resp = client.get(user_info_url[name], params={'skip_status': True})
+                resp = client.get(USER_INFO_URL[name], params={'skip_status': True})
                 data = {
                     'email': resp.json().get('email'),
                 }
@@ -67,6 +89,11 @@ class UserServices:
         return make_response(data_or_errors, HTTPStatus.BAD_REQUEST)
 
     def login(self):
+        """
+        This function handles the login of user.
+        Return
+        JWT tokens if login is successful else return respective error and status code.
+        """
         data = self.request.get_json(force=True, silent=True)
         is_valid, data_or_errors = Serializer.load(data, user_schema)
 
@@ -85,7 +112,16 @@ class UserServices:
             return make_response(ERR_USER_WITH_EMAIL_NOT_EXISTS, HTTPStatus.FORBIDDEN)
         return make_response(data_or_errors, HTTPStatus.BAD_REQUEST)
 
+    @staticmethod
     def refresh_token(self):
+        """
+        Generates new access token.
+        Parameter
+        ---------
+        Return
+        ------
+        {message, access_token}, http status code
+        """
         identity = get_jwt_identity()
         access_token = JWTAuthentication(identity).create_jwt_access_token()
         return make_response(

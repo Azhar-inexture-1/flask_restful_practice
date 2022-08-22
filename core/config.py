@@ -23,6 +23,8 @@ GITHUB_CLIENT_SECRET = os.environ.get('GITHUB_CLIENT_SECRET')
 
 
 class Config:
+    """Contains all the app configuration variables.
+    """
     SQLALCHEMY_DATABASE_URI = f"postgresql://{username}:{password}@{host}:{port}/{database}"
 
     PROPAGATE_EXCEPTIONS = True

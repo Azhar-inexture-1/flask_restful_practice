@@ -1,3 +1,8 @@
+"""
+Stored the oauth configurations for different providers.
+Providers information is stored, example can be of google, facebook, twitter.
+"""
+
 from core import oauth
 
 CONF_URL = 'https://accounts.google.com/.well-known/openid-configuration'
