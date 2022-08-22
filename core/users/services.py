@@ -8,8 +8,9 @@ from core.utils import Serializer
 from .models import User, OAuth
 from flask import make_response
 from http import HTTPStatus
-from .utils import Hasher, normalize_userinfo, user_info_url, get_github_data
+from .utils import Hasher, user_info_url, get_github_data
 from .jwt_utils import JWTAuthentication
+from flask_jwt_extended import get_jwt_identity
 
 
 user_schema = UserRequestSchema()
@@ -83,3 +84,12 @@ class UserServices:
                 return make_response(ERR_PASSWORD_INCORRECT, HTTPStatus.UNAUTHORIZED)
             return make_response(ERR_USER_WITH_EMAIL_NOT_EXISTS, HTTPStatus.FORBIDDEN)
         return make_response(data_or_errors, HTTPStatus.BAD_REQUEST)
+
+    def refresh_token(self):
+        identity = get_jwt_identity()
+        access_token = JWTAuthentication(identity).create_jwt_access_token()
+        return make_response(
+            {
+                "message": "Successful.",
+                "access_token": access_token
+            }, HTTPStatus.OK)

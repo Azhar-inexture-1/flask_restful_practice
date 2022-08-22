@@ -2,7 +2,7 @@ from core import marshmallow
 from .models import User
 from core.constants import PASSWORD_REGEX
 from marshmallow.validate import Regexp
-from marshmallow import fields, validates, ValidationError
+from marshmallow import fields
 
 
 class UserSchema(marshmallow.SQLAlchemyAutoSchema):
@@ -27,8 +27,3 @@ class SocialAuthUserSchema(marshmallow.SQLAlchemyAutoSchema):
     class Meta:
         model = User
         fields = ['email']
-
-    # @validates('email')
-    # def is_not_in_future(self, value):
-    #     if User.query.filter(User.email == value).first() is not None:
-    #         raise ValidationError("Cannot register, user with same email already exists!")

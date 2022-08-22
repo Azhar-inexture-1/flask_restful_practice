@@ -1,6 +1,7 @@
 from flask import Blueprint, request
 from flask_restful import Api, Resource
 from core.users.services import UserServices
+from flask_jwt_extended import jwt_required
 
 users_blueprint = Blueprint('users', __name__)
 users_api = Api(users_blueprint)
@@ -24,6 +25,16 @@ class RegisterUser(Resource):
         return cls.register_service.register()
 
 
+class RefreshToken(Resource):
+
+    user_service = UserServices(request)
+
+    @classmethod
+    @jwt_required(refresh=True)
+    def post(cls):
+        return cls.user_service.refresh_token()
+
+
 class SocialAuthUser(Resource):
 
     auth_service = UserServices(request)
@@ -36,3 +47,4 @@ class SocialAuthUser(Resource):
 users_api.add_resource(RegisterUser, '/register')
 users_api.add_resource(SocialAuthUser, '/social-auth/<string:name>')
 users_api.add_resource(LoginUser, '/login')
+users_api.add_resource(RefreshToken, '/refresh')

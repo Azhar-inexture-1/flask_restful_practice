@@ -51,10 +51,10 @@ class Task(db.Model):
     children = db.relationship("Task",
                                backref=db.backref('parent', remote_side=[id])
                                )
-    list_id = db.Column(db.Integer, db.ForeignKey(TaskList.id), nullable=False)
-    list = db.relationship(TaskList)
+    list_id = db.Column(db.Integer, db.ForeignKey(TaskList.id), nullable=True)
+    list = db.relationship(TaskList, overlaps="tasks")
 
-    task_list = db.relationship("TaskList", back_populates="tasks")
+    task_list = db.relationship("TaskList", back_populates="tasks", overlaps="list")
 
     def __init__(self, data):
         self.title = data.get('title')
