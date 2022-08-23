@@ -33,6 +33,6 @@ class SocialAuthUserSchema(marshmallow.SQLAlchemyAutoSchema):
     Contains the fields required from the oauth provider.
     """
 
-    class Meta:
-        model = User
-        fields = ['email']
+    provider = fields.Str(required=True)
+    account_id = fields.Str(allow_none=True)
+    email = fields.Email(allow_none=True)

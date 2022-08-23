@@ -1,7 +1,7 @@
 from core.constants import (
     ERR_PASSWORD_INCORRECT, ERR_USER_WITH_EMAIL_NOT_EXISTS,
     MSG_LOG_IN_SUCCESSFULLY, USER_INFO_URL
-    )
+)
 from core.social_auth.oauth import oauth
 from .schemas import UserSchema, UserRequestSchema, SocialAuthUserSchema
 from core.utils import Serializer
@@ -11,7 +11,6 @@ from http import HTTPStatus
 from .utils import Hasher
 from .jwt_utils import JWTAuthentication
 from flask_jwt_extended import get_jwt_identity
-
 
 user_schema = UserRequestSchema()
 user_register_response_schema = UserSchema(load_only=('password',))
@@ -30,7 +29,7 @@ class UserServices:
         """
         data = self.request.get_json(force=True, silent=True)
         is_valid, data_or_errors = Serializer.load(data, user_schema)
-        
+
         if is_valid:
             response = User.save(data_or_errors)
             json_response = Serializer.dump(response, user_register_response_schema)
@@ -53,33 +52,37 @@ class UserServices:
 
         token = self.request.get_json(force=True, silent=True).get('token')
         if token is None:
-            return make_response({
-                "message": "Token is required"
-            }, HTTPStatus.BAD_REQUEST)
+            return make_response({"message": "Token is required"}, HTTPStatus.BAD_REQUEST)
 
         client.token = token
         data = token.get('userinfo')
-        if data is None:
-            resp = client.get(USER_INFO_URL[name], params={'skip_status': True})
-            print(resp.json())
 
-        # is_valid, data_or_errors = Serializer.load(data, social_auth_user_schema)
-        # if is_valid:
-        #     status, message, user = OAuth.social_auth(data_or_errors, name)
-        #     if status:
-        #         tokens = JWTAuthentication(user.id).get_tokens_for_user()
-        #         response_data = Serializer.dump(data=user,
-        #                                         schema=user_login_response_schema,
-        #                                         extra_args=tokens)
-        #         return make_response({
-        #             "message": message['message'],
-        #             "data": response_data
-        #         }, HTTPStatus.OK)
-        #     return make_response({
-        #         "message": message['message'],
-        #     }, HTTPStatus.BAD_REQUEST)
-        # return make_response(data_or_errors, HTTPStatus.BAD_REQUEST)
-        return make_response("asdasd")
+        if data is None:
+            response = client.get(USER_INFO_URL[name], params={'skip_status': True})
+            response_data = response.json()
+            if response.status_code != 200:
+                return make_response(response_data, HTTPStatus.BAD_REQUEST)
+
+            data = {'email': response_data.get('email'), 'account_id': str(response_data.get('id'))}
+
+        data['provider'] = name
+
+        is_valid, data_or_errors = Serializer.load(data, social_auth_user_schema)
+        if is_valid:
+            status, message, user = OAuthUser.auth(data_or_errors)
+            if status:
+                tokens = JWTAuthentication(user.id).get_tokens_for_user()
+                response_data = Serializer.dump(data=user,
+                                                schema=user_login_response_schema,
+                                                extra_args=tokens)
+                return make_response({
+                    "message": message['message'],
+                    "data": response_data
+                }, HTTPStatus.OK)
+            return make_response({
+                "message": message['message'],
+            }, HTTPStatus.BAD_REQUEST)
+        return make_response(data_or_errors, HTTPStatus.BAD_REQUEST)
 
     def login(self):
         """
@@ -98,15 +101,15 @@ class UserServices:
                                                     schema=user_login_response_schema,
                                                     extra_args=tokens)
                     return make_response({
-                            "message": MSG_LOG_IN_SUCCESSFULLY,
-                            "data": response_data
-                            }, HTTPStatus.OK)
+                        "message": MSG_LOG_IN_SUCCESSFULLY,
+                        "data": response_data
+                    }, HTTPStatus.OK)
                 return make_response(ERR_PASSWORD_INCORRECT, HTTPStatus.UNAUTHORIZED)
             return make_response(ERR_USER_WITH_EMAIL_NOT_EXISTS, HTTPStatus.FORBIDDEN)
         return make_response(data_or_errors, HTTPStatus.BAD_REQUEST)
 
     @staticmethod
-    def refresh_token(self):
+    def refresh_token():
         """
         Generates new access token.
         Parameter

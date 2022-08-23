@@ -6,12 +6,14 @@ from core.social_auth.models import OAuthMixin
 
 class User(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    email = db.Column(db.String, unique=True, nullable=False)
+    email = db.Column(db.String, unique=True, nullable=True)
+    oauth_account_id = db.Column(db.String, unique=True, nullable=True)
     password = db.Column(db.String, nullable=True)
     created_at = db.Column(db.DateTime, default=datetime.now())
 
     def __init__(self, data, social=False):
         self.email = data.get('email')
+        self.oauth_account_id = data.get('account_id')
         if not social:
             self.password = Hasher.get_hashed_password(data.get('password'))
 
@@ -73,7 +75,53 @@ class OAuthUser(OAuthMixin, db.Model):
     user_id = db.Column(db.Integer, db.ForeignKey(User.id))
     user = db.relationship(User)
 
-    def __init__(self, data, user_id, provider):
+    def __init__(self, data, user_id, **kwargs):
         self.email = data.get('email')
-        self.provider = provider
+        self.provider = data.get('provider')
+        self.account_id = data.get('account_id')
         self.user_id = user_id
+
+    @classmethod
+    def auth(cls, data):
+        """
+        Handles social auth, returns proper responses for user request.
+        Creates user if social auth is connected for the first time.
+        Parameter
+        ---------
+        data: Python Dict
+            key pair values of user information.
+        provider: string
+            name of the oauth provider.
+            example: "google", "github", "twitter" etc.
+        return
+        ------
+        Status true or false, message, model object or none
+        """
+        email = data.get('email')
+        provider = data.get('provider')
+        account_id = data.get('account_id')
+        user = None
+        oauth_user = None
+
+        if email is not None:
+            user = User.query.filter_by(email=email).first()
+
+        elif account_id is not None:
+            user = User.query.filter_by(oauth_account_id=account_id).first()
+
+        if user is not None:
+            oauth_user = cls.query.filter_by(user_id=user.id).first()
+
+            if oauth_user is None:
+                return False, {'message': 'Please use password to login!'}, None
+
+            if oauth_user.provider != provider:
+                return False, {'message': f"Same user is registered with {oauth_user.provider}, please login using \
+{oauth_user.provider}"}, None
+
+        else:
+            user = User.save_social(data)
+            oauth_user = cls(data, user.id)
+            db.session.add(oauth_user)
+            db.session.commit()
+        return True, {'message': 'Login successful!'}, user
