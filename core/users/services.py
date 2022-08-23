@@ -2,10 +2,10 @@ from core.constants import (
     ERR_PASSWORD_INCORRECT, ERR_USER_WITH_EMAIL_NOT_EXISTS,
     MSG_LOG_IN_SUCCESSFULLY, USER_INFO_URL
     )
-from .oauth import oauth
+from core.social_auth.oauth import oauth
 from .schemas import UserSchema, UserRequestSchema, SocialAuthUserSchema
 from core.utils import Serializer
-from .models import User, OAuth
+from .models import User, OAuthUser
 from flask import make_response
 from http import HTTPStatus
 from .utils import Hasher
@@ -48,45 +48,38 @@ class UserServices:
             example: "google", "twitter", etc.
         """
         client = oauth.create_client(name)
+        if client is None:
+            return make_response({"error": "Invalid Request"}, HTTPStatus.BAD_REQUEST)
+
         token = self.request.get_json(force=True, silent=True).get('token')
         if token is None:
             return make_response({
                 "message": "Token is required"
             }, HTTPStatus.BAD_REQUEST)
+
         client.token = token
-        user = token.get('userinfo')
-        data = {}
-        if not user:
-            if name == 'github':
-                resp = client.get('https://api.github.com/user/emails')
-                email = None
-                for fields in resp.json():
-                    if fields['primary']:
-                        email = fields['email']
-                        break
-                data['email'] = email
-            else:
-                resp = client.get(USER_INFO_URL[name], params={'skip_status': True})
-                data = {
-                    'email': resp.json().get('email'),
-                }
-        print(data)
-        is_valid, data_or_errors = Serializer.load(data, social_auth_user_schema)
-        if is_valid:
-            status, message, user = OAuth.social_auth(data_or_errors, name)
-            if status:
-                tokens = JWTAuthentication(user.id).get_tokens_for_user()
-                response_data = Serializer.dump(data=user,
-                                                schema=user_login_response_schema,
-                                                extra_args=tokens)
-                return make_response({
-                    "message": message['message'],
-                    "data": response_data
-                }, HTTPStatus.OK)
-            return make_response({
-                "message": message['message'],
-            }, HTTPStatus.BAD_REQUEST)
-        return make_response(data_or_errors, HTTPStatus.BAD_REQUEST)
+        data = token.get('userinfo')
+        if data is None:
+            resp = client.get(USER_INFO_URL[name], params={'skip_status': True})
+            print(resp.json())
+
+        # is_valid, data_or_errors = Serializer.load(data, social_auth_user_schema)
+        # if is_valid:
+        #     status, message, user = OAuth.social_auth(data_or_errors, name)
+        #     if status:
+        #         tokens = JWTAuthentication(user.id).get_tokens_for_user()
+        #         response_data = Serializer.dump(data=user,
+        #                                         schema=user_login_response_schema,
+        #                                         extra_args=tokens)
+        #         return make_response({
+        #             "message": message['message'],
+        #             "data": response_data
+        #         }, HTTPStatus.OK)
+        #     return make_response({
+        #         "message": message['message'],
+        #     }, HTTPStatus.BAD_REQUEST)
+        # return make_response(data_or_errors, HTTPStatus.BAD_REQUEST)
+        return make_response("asdasd")
 
     def login(self):
         """

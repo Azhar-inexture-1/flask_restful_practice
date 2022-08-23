@@ -90,6 +90,6 @@ class SocialAuthUser(Resource):
 
 
 users_api.add_resource(RegisterUser, '/register')
-users_api.add_resource(SocialAuthUser, '/social-auth/<string:name>')
+users_api.add_resource(SocialAuthUser, '/auth/<string:name>')
 users_api.add_resource(LoginUser, '/login')
 users_api.add_resource(RefreshToken, '/refresh')

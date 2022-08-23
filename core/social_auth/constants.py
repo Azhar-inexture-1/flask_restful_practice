@@ -1,0 +1,1 @@
+GOOGLE_OPEN_ID_URL = 'https://openidconnect.googleapis.com/v1/userinfo'
