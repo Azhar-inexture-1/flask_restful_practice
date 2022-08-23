@@ -60,9 +60,9 @@ class UserServices:
             if name == 'github':
                 resp = client.get('https://api.github.com/user/emails')
                 email = None
-                for data in resp.json():
-                    if data['primary']:
-                        email = data['email']
+                for fields in resp.json():
+                    if fields['primary']:
+                        email = fields['email']
                         break
                 data['email'] = email
             else:
@@ -70,7 +70,7 @@ class UserServices:
                 data = {
                     'email': resp.json().get('email'),
                 }
-
+        print(data)
         is_valid, data_or_errors = Serializer.load(data, social_auth_user_schema)
         if is_valid:
             status, message, user = OAuth.social_auth(data_or_errors, name)
