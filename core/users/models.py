@@ -2,6 +2,7 @@ from core import db
 from datetime import datetime
 from .utils import Hasher
 from core.social_auth.models import OAuthMixin
+from ..constants import PASSWORD_LOGIN_REQUIRED, oauth_login_mismatch, MSG_LOG_IN_SUCCESSFULLY
 
 
 class User(db.Model):
@@ -109,15 +110,14 @@ class OAuthUser(OAuthMixin, db.Model):
             oauth_user = cls.query.filter_by(user_id=user.id).first()
 
             if oauth_user is None:
-                return False, {'message': 'Please use password to login!'}, None
+                return False, PASSWORD_LOGIN_REQUIRED, None
 
             if oauth_user.provider != provider:
-                return False, {'message': f"Same user is registered with {oauth_user.provider}, please login using \
-{oauth_user.provider}"}, None
+                return False, oauth_login_mismatch(oauth_user.provider), None
 
         else:
             user = User.save_social(data)
             oauth_user = cls(data, user.id)
             db.session.add(oauth_user)
             db.session.commit()
-        return True, {'message': 'Login successful!'}, user
+        return True, MSG_LOG_IN_SUCCESSFULLY, user

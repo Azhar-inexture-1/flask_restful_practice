@@ -64,6 +64,44 @@ class TaskResources(Resource):
         return cls.task_services.delete(id)
 
 
+class TaskMakeParentResources(Resource):
+    """This endpoint is used for making a child task as parent.
+    """
+    task_services = TaskServices(request)
+
+    @classmethod
+    @jwt_required()
+    def post(cls, id):
+        """
+        This is called when request method is post.
+        Parameter
+        ---------
+        id: id of task
+        Return
+        ------
+        """
+        return cls.task_services.make_parent(id)
+
+
+class TaskSwitchListResources(Resource):
+    """This endpoint is used for making a child task as parent.
+    """
+    task_services = TaskServices(request)
+
+    @classmethod
+    @jwt_required()
+    def post(cls, task_id, list_id):
+        """
+        This is called when request method is post.
+        Parameter
+        ---------
+        id: id of task
+        Return
+        ------
+        """
+        return cls.task_services.switch_list(task_id, list_id)
+
+
 class TaskListResources(Resource):
     task_list_services = TaskListServices(request)
 
@@ -120,4 +158,6 @@ class TaskListResources(Resource):
 
 
 tasks_api.add_resource(TaskResources, '/task', '/task/<int:id>')
+tasks_api.add_resource(TaskMakeParentResources, '/task_make_parent/<int:id>')
+tasks_api.add_resource(TaskSwitchListResources, '/switch_list/<int:task_id>/<int:list_id>')
 tasks_api.add_resource(TaskListResources, '/task_list', '/task_list/<int:id>')

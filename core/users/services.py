@@ -62,11 +62,11 @@ class UserServices:
             response_data = response.json()
             if response.status_code != 200:
                 return make_response(response_data, HTTPStatus.BAD_REQUEST)
-
             data = {'email': response_data.get('email'), 'account_id': str(response_data.get('id'))}
 
         data['provider'] = name
 
+        # validating and storing userinfo to database
         is_valid, data_or_errors = Serializer.load(data, social_auth_user_schema)
         if is_valid:
             status, message, user = OAuthUser.auth(data_or_errors)
@@ -76,7 +76,7 @@ class UserServices:
                                                 schema=user_login_response_schema,
                                                 extra_args=tokens)
                 return make_response({
-                    "message": message['message'],
+                    "message": message,
                     "data": response_data
                 }, HTTPStatus.OK)
             return make_response({

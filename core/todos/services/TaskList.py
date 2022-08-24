@@ -27,7 +27,7 @@ class TaskListServices:
         ------
         JSON Response, HTTP status code
         """
-        data = TaskList.get()
+        data = TaskList.get(current_user.id)
         json_response = task_list_schema.dump(data, many=True)
         return make_response(json_response, HTTPStatus.OK)
 
@@ -42,7 +42,7 @@ class TaskListServices:
         ------
         JSON Response, HTTP status code
         """
-        data = TaskList.get_by_id(id)
+        data = TaskList.get_by_id(id, current_user.id)
         if data is None:
             return make_response(CONTENT_NOT_FOUND_MESSAGE, HTTPStatus.NOT_FOUND)
         json_response = task_list_schema.dump(data)

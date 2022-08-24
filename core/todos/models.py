@@ -15,14 +15,14 @@ class TaskList(db.Model):
         self.user_id = data.get('user_id')
 
     @classmethod
-    def get(cls):
+    def get(cls, user_id):
         """
         This method fetch tasklist.
         Return
         ------
         tuple of model objects.
         """
-        return cls.query.all()
+        return cls.query.filter_by(user_id=user_id).all()
 
     @classmethod
     def save(cls, data):
@@ -42,7 +42,7 @@ class TaskList(db.Model):
         return obj
 
     @classmethod
-    def get_by_id(cls, id):
+    def get_by_id(cls, id, user_id):
         """
         This method fetch tasklist by id.
         Parameter
@@ -52,7 +52,7 @@ class TaskList(db.Model):
         ------
         model object or None.
         """
-        return cls.query.filter_by(id=id).first()
+        return cls.query.filter_by(id=id, user_id=user_id).first()
 
     def update(self, data):
         """
@@ -94,13 +94,17 @@ class Task(db.Model):
 
     task_list = db.relationship("TaskList", back_populates="tasks", overlaps="list")
 
+    user_id = db.Column(db.Integer, db.ForeignKey(User.id))
+    user = db.relationship(User)
+
     def __init__(self, data):
         self.title = data.get('title')
+        self.user_id = data.get('user_id')
         self.list_id = data.get('list_id')
         self.parent_id = data.get('parent_id')
 
     @classmethod
-    def get(cls):
+    def get(cls, user_id):
         """
         This method fetch all tasks.
         return
@@ -127,7 +131,7 @@ class Task(db.Model):
         return task
 
     @classmethod
-    def get_by_id(cls, id):
+    def get_by_id(cls, id, user_id):
         """
         This method fetch task by id.
         Parameter
@@ -137,7 +141,7 @@ class Task(db.Model):
         ------
         model object or None.
         """
-        return cls.query.filter_by(id=id).first()
+        return cls.query.filter_by(id=id, user_id=user_id).first()
 
     def update(self, data):
         """
@@ -162,6 +166,19 @@ class Task(db.Model):
         db.session.delete(self)
         db.session.commit()
         return None
+
+    def make_parent(self):
+        parent_task = Task.get_by_id(self.parent_id, self.user_id)
+        self.parent_id = None
+        self.list_id = parent_task.list_id
+        db.session.commit()
+        return self
+
+    def switch_list(self, list_id):
+        self.parent_id = None
+        self.list_id = list_id
+        db.session.commit()
+        return self
 
     def __repr__(self):
         return '<{} (id={})>'.format(type(self).__name__, self.id)
