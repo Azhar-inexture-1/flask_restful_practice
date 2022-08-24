@@ -3,7 +3,6 @@ from http import HTTPStatus
 from core.social_auth.oauth import oauth
 from core.social_auth.constants import GOOGLE_OPEN_ID_URL
 from core.social_auth.schemas import AuthSchema
-from core.utils import Serializer
 
 auth_schema = AuthSchema()
 
@@ -22,20 +21,23 @@ class GoogleAuth:
         ------
         """
         client = oauth.create_client("google")
+        if client is None:
+            return {"error": "Invalid Request"}
+
         token = self.request.get_json(force=True, silent=True).get('token')
         if token is None:
-            return make_response({
-                "message": "Token is required"
-            }, HTTPStatus.BAD_REQUEST)
+            return {"error": "Token is required"}
+
         client.token = token
-        user = token.get('userinfo')
-        data = {}
-        if not user:
-            resp = client.get(GOOGLE_OPEN_ID_URL, params={'skip_status': True})
-            print(resp.status_code)
-            data = {
-                'email': resp.json().get('email'),
-            }
+
+        data = token.get('userinfo')
+        if data is None:
+            response = client.get(GOOGLE_OPEN_ID_URL, params={'skip_status': True})
+            response_data = response.json()
+            if response.status_code != 200:
+                return make_response(response_data, HTTPStatus.BAD_REQUEST)
+
+            data = {'email': response_data.get('email'), 'account_id': str(response_data.get('id'))}
+
         data['provider'] = 'google'
-        is_valid, data_or_errors = Serializer.load(data, auth_schema)
-        return is_valid, data_or_errors
+        return data

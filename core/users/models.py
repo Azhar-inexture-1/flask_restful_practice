@@ -69,13 +69,10 @@ class User(db.Model):
 
 
 class OAuthUser(OAuthMixin, db.Model):
-    id = db.Column(db.Integer, primary_key=True)
-    provider = db.Column(db.String(50), nullable=False)
-    created_at = db.Column(db.DateTime, default=datetime.utcnow, nullable=False)
     user_id = db.Column(db.Integer, db.ForeignKey(User.id))
     user = db.relationship(User)
 
-    def __init__(self, data, user_id, **kwargs):
+    def __init__(self, data, user_id):
         self.email = data.get('email')
         self.provider = data.get('provider')
         self.account_id = data.get('account_id')
@@ -101,7 +98,6 @@ class OAuthUser(OAuthMixin, db.Model):
         provider = data.get('provider')
         account_id = data.get('account_id')
         user = None
-        oauth_user = None
 
         if email is not None:
             user = User.query.filter_by(email=email).first()
