@@ -99,22 +99,16 @@ class OAuthUser(OAuthMixin, db.Model):
         provider = data.get('provider')
         account_id = data.get('account_id')
         user = None
-
-        if email is not None:
+        if email:
             user = User.query.filter_by(email=email).first()
-
-        elif account_id is not None:
+        elif account_id:
             user = User.query.filter_by(oauth_account_id=account_id).first()
-
-        if user is not None:
+        if user:
             oauth_user = cls.query.filter_by(user_id=user.id).first()
-
-            if oauth_user is None:
+            if not oauth_user:
                 return False, PASSWORD_LOGIN_REQUIRED, None
-
             if oauth_user.provider != provider:
                 return False, oauth_login_mismatch(oauth_user.provider), None
-
         else:
             user = User.save_social(data)
             oauth_user = cls(data, user.id)

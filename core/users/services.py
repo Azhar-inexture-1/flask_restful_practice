@@ -47,21 +47,22 @@ class UserServices:
             example: "google", "twitter", etc.
         """
         client = oauth.create_client(name)
-        if client is None:
+        if not client:
             return make_response({"error": "Invalid Request"}, HTTPStatus.BAD_REQUEST)
 
         token = self.request.get_json(force=True, silent=True).get('token')
-        if token is None:
+        if not token:
             return make_response({"message": "Token is required"}, HTTPStatus.BAD_REQUEST)
 
         client.token = token
         data = token.get('userinfo')
 
-        if data is None:
+        if not data:
             response = client.get(USER_INFO_URL[name], params={'skip_status': True})
             response_data = response.json()
             if response.status_code != 200:
                 return make_response(response_data, HTTPStatus.BAD_REQUEST)
+
             data = {'email': response_data.get('email'), 'account_id': str(response_data.get('id'))}
 
         data['provider'] = name

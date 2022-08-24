@@ -43,7 +43,7 @@ class TaskListServices:
         JSON Response, HTTP status code
         """
         data = TaskList.get_by_id(id, current_user.id)
-        if data is None:
+        if not data:
             return make_response(CONTENT_NOT_FOUND_MESSAGE, HTTPStatus.NOT_FOUND)
         json_response = task_list_schema.dump(data)
         return make_response(json_response, HTTPStatus.OK)
@@ -58,7 +58,6 @@ class TaskListServices:
         data = self.request.get_json(force=True, silent=True)
         data['user_id'] = current_user.id
         is_valid, data_or_errors = Serializer.load(data, task_list_schema)
-        print(is_valid)
         if is_valid:
             response = TaskList.save(data_or_errors)
             json_response = task_list_schema.dump(response)
@@ -99,7 +98,7 @@ class TaskListServices:
         JSON Response, HTTP status code
         """
         task = TaskList.get_by_id(id)
-        if task is not None:
+        if task:
             task.delete()
             return make_response(DELETE_SUCCESSFUL_MESSAGE, HTTPStatus.NO_CONTENT)
 

@@ -45,7 +45,7 @@ class TaskServices:
         JSON Response, HTTP status code
         """
         data = Task.get_by_id(id, current_user.id)
-        if data is None:
+        if not data:
             return make_response(CONTENT_NOT_FOUND_MESSAGE, HTTPStatus.NOT_FOUND)
         json_response = task_schema.dump(data)
         return make_response(json_response, HTTPStatus.OK)
@@ -102,7 +102,7 @@ class TaskServices:
         JSON Response, HTTP status code
         """
         task = Task.get_by_id(id, current_user.id)
-        if task is not None:
+        if task:
             task.delete()
             return make_response(DELETE_SUCCESSFUL_MESSAGE, HTTPStatus.NO_CONTENT)
 
@@ -112,7 +112,7 @@ class TaskServices:
     def make_parent(cls, id):
         task = Task.get_by_id(id, current_user.id)
         if task:
-            if task.parent_id is not None:
+            if task.parent_id:
                 response = task.make_parent()
                 json_response = Serializer.dump(data=response, schema=task_schema)
                 return make_response({"message": CHANGED_TO_PARENT_TASK_SUCCESS, "data": json_response}, HTTPStatus.OK)
@@ -123,10 +123,10 @@ class TaskServices:
     @classmethod
     def switch_list(cls, task_id, list_id):
         task = Task.get_by_id(task_id, current_user.id)
-        if task is None:
+        if not task:
             return make_response(TASK_NOT_FOUND, HTTPStatus.NOT_FOUND)
         tasklist = TaskList.get_by_id(list_id, current_user.id)
-        if tasklist is None:
+        if not tasklist:
             return make_response(LIST_NOT_FOUND, HTTPStatus.NOT_FOUND)
 
         if task.list_id != list_id:
