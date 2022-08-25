@@ -10,12 +10,11 @@ MSG_LOG_IN_SUCCESSFULLY = "Successfully Logged in."
 ERR_PASSWORD_INCORRECT = {"message": "Password incorrect."}
 ERR_USER_WITH_EMAIL_NOT_EXISTS = {"message": "There is no user with given email"}
 ERR_USER_NOT_EXISTS = {"message": "user with is {} is not exists"}
-PASSWORD_LOGIN_REQUIRED = {'message': 'Please use password to login!'}
+PASSWORD_LOGIN_REQUIRED = 'Please use password to login!'
 
 
 def oauth_login_mismatch(provider):
-    return {'message': f"Same user is registered with {provider}, please login using \
-{provider}"}
+    return f"Same user is registered with {provider}, please login using {provider}"
 
 
 # social auth

@@ -2,7 +2,8 @@ from core import db
 from datetime import datetime
 from .utils import Hasher
 from core.social_auth.models import OAuthMixin
-from ..constants import PASSWORD_LOGIN_REQUIRED, oauth_login_mismatch, MSG_LOG_IN_SUCCESSFULLY
+from ..constants import PASSWORD_LOGIN_REQUIRED, oauth_login_mismatch
+from werkzeug.exceptions import BadRequest
 
 
 class User(db.Model):
@@ -106,12 +107,12 @@ class OAuthUser(OAuthMixin, db.Model):
         if user:
             oauth_user = cls.query.filter_by(user_id=user.id).first()
             if not oauth_user:
-                return False, PASSWORD_LOGIN_REQUIRED, None
+                raise BadRequest(PASSWORD_LOGIN_REQUIRED)
             if oauth_user.provider != provider:
-                return False, oauth_login_mismatch(oauth_user.provider), None
+                raise BadRequest(oauth_login_mismatch(oauth_user.provider))
         else:
             user = User.save_social(data)
             oauth_user = cls(data, user.id)
             db.session.add(oauth_user)
             db.session.commit()
-        return True, MSG_LOG_IN_SUCCESSFULLY, user
+        return user

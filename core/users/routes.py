@@ -3,8 +3,20 @@ from flask_restful import Api, Resource
 from core.users.services import UserServices
 from flask_jwt_extended import jwt_required
 
+errors = {
+    'UserAlreadyExistsError': {
+        'message': "A user with that username already exists.",
+        'status': 409,
+    },
+    'ResourceDoesNotExist': {
+        'message': "A resource with that ID no longer exists.",
+        'status': 410,
+        'extra': "Any extra information you want.",
+    },
+}
+
 users_blueprint = Blueprint('users', __name__)
-users_api = Api(users_blueprint)
+users_api = Api(users_blueprint, errors=errors)
 
 
 class LoginUser(Resource):
@@ -86,7 +98,8 @@ class SocialAuthUser(Resource):
         Return
         ------
         """
-        return cls.auth_service.social_auth(name)
+        # return cls.auth_service.social_auth(name)
+        return cls.auth_service.oauth(name)
 
 
 users_api.add_resource(RegisterUser, '/register')
