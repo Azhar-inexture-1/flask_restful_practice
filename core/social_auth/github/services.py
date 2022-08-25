@@ -9,7 +9,7 @@ class GithubAuth:
     def __init__(self, request):
         self.request = request
         self.client = oauth.create_client("github")
-        if self.client is None:
+        if not self.client:
             raise BadRequest("Github is not register for oauth in the backend.")
 
     def get_mail(self):
@@ -41,13 +41,13 @@ class GithubAuth:
         data: dict
         """
         token = self.request.get_json(force=True, silent=True).get('token')
-        if token is None:
+        if not token:
             raise BadRequest("The Token is not provided.")
 
         self.client.token = token
 
         data = token.get('userinfo')
-        if data is None:
+        if not data:
             try:
                 response = self.client.get(GITHUB_USERINFO_URL, params={'skip_status': True})
             except RequestException as e:
