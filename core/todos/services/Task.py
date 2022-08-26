@@ -1,7 +1,7 @@
 from core import db
 from core.constants import CONTENT_NOT_FOUND_MESSAGE, DELETE_SUCCESSFUL_MESSAGE, CHANGED_TO_PARENT_TASK_SUCCESS, \
     CHANGED_TO_PARENT_TASK_FAILED, TASK_NOT_FOUND, SWITCH_LIST_FAILED, SWITCH_LIST_SUCCESS, LIST_NOT_FOUND
-from core.todos.schemas import TaskSchema
+from core.todos.schemas import TaskSchema, TaskUpdateSchema
 from core.utils import Serializer
 from core.todos.models import Task, TaskList
 from flask import make_response
@@ -9,7 +9,7 @@ from http import HTTPStatus
 from flask_jwt_extended import current_user
 
 task_schema = TaskSchema()
-task_update_request_schema = TaskSchema(partial=True)
+task_update_request_schema = TaskUpdateSchema(partial=True)
 
 
 class TaskServices:

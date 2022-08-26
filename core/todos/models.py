@@ -1,5 +1,6 @@
 from core import db
 from core.users.models import User
+from datetime import datetime
 
 
 class TaskList(db.Model):
@@ -8,7 +9,7 @@ class TaskList(db.Model):
     user_id = db.Column(db.Integer, db.ForeignKey(User.id))
     user = db.relationship(User)
 
-    tasks = db.relationship("Task", back_populates="task_list")
+    tasks = db.relationship("Task", back_populates="task_list", cascade="all, delete-orphan")
 
     def __init__(self, data):
         self.title = data.get('title')
@@ -85,15 +86,17 @@ class TaskList(db.Model):
 class Task(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     title = db.Column(db.String, nullable=False)
+    due_date = db.Column(db.Date, nullable=True)
+    completed = db.Column(db.Boolean, default=False, nullable=False)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow, nullable=False)
     parent_id = db.Column(db.Integer, db.ForeignKey('task.id'), nullable=True)
     children = db.relationship("Task",
-                               backref=db.backref('parent', remote_side=[id])
+                               backref=db.backref('parent', remote_side=[id]),
+                               cascade="all, delete-orphan"
                                )
     list_id = db.Column(db.Integer, db.ForeignKey(TaskList.id), nullable=True)
     list = db.relationship(TaskList, overlaps="tasks")
-
     task_list = db.relationship("TaskList", back_populates="tasks", overlaps="list")
-
     user_id = db.Column(db.Integer, db.ForeignKey(User.id))
     user = db.relationship(User)
 
@@ -102,6 +105,7 @@ class Task(db.Model):
         self.user_id = data.get('user_id')
         self.list_id = data.get('list_id')
         self.parent_id = data.get('parent_id')
+        self.due_date = data.get('due_date')
 
     @classmethod
     def get(cls, user_id):

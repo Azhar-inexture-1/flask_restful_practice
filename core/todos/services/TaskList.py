@@ -97,7 +97,7 @@ class TaskListServices:
         ------
         JSON Response, HTTP status code
         """
-        task = TaskList.get_by_id(id)
+        task = TaskList.get_by_id(id, current_user.id)
         if task:
             task.delete()
             return make_response(DELETE_SUCCESSFUL_MESSAGE, HTTPStatus.NO_CONTENT)

@@ -1,6 +1,7 @@
 from core import marshmallow
 from .models import Task, TaskList
 from marshmallow import fields, validates_schema, ValidationError
+from flask_jwt_extended import current_user
 
 
 class SubTaskSchema(marshmallow.SQLAlchemyAutoSchema):
@@ -33,15 +34,32 @@ class TaskSchema(marshmallow.SQLAlchemyAutoSchema):
         list_id = data.get('list_id')
         parent_id = data.get('parent_id')
 
-        if list_id is not None and parent_id is not None:
+        if list_id and parent_id:
             raise ValidationError({
                 "error": "Task can only have either of list_id or parent_id attribute."
             })
 
-        if list_id is None and parent_id is None:
+        if not list_id and not parent_id:
             raise ValidationError({
                 "error": "Task should must have either of list_id or parent_id attribute."
             })
+
+        if list_id:
+            tasklist = TaskList.get_by_id(list_id, current_user.id)
+            if not tasklist:
+                raise ValidationError({
+                    "error": {
+                        "list_id": "Invalid list_id, value does not exists"
+                    }
+                })
+        else:
+            task = Task.get_by_id(parent_id, current_user.id)
+            if not task:
+                raise ValidationError({
+                    "error": {
+                        "parent_id": "Invalid parent_id, value does not exists"
+                    }
+                })
 
 
 class TaskListSchema(marshmallow.SQLAlchemyAutoSchema):
@@ -53,3 +71,9 @@ class TaskListSchema(marshmallow.SQLAlchemyAutoSchema):
         model = TaskList
 
     tasks = fields.Nested(TaskSchema, many=True)
+
+
+class TaskUpdateSchema(marshmallow.SQLAlchemyAutoSchema):
+    class Meta:
+        model = Task
+        fields = ['title', 'due_date', "completed"]
