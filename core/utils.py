@@ -1,4 +1,6 @@
 from marshmallow import ValidationError
+from . import mail
+from flask_mail import Message
 
 
 class Serializer:
@@ -58,3 +60,12 @@ class Serializer:
         if extra_args:
             data.update(extra_args)
         return data
+
+
+def send_email(user_email, subject, body):
+    print(user_email)
+    msg = Message(subject,
+                  sender='noreply@demo.com',
+                  recipients=[user_email])
+    msg.body = body
+    mail.send(msg)

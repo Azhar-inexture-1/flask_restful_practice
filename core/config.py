@@ -25,6 +25,9 @@ GITHUB_CLIENT_SECRET = os.environ.get('GITHUB_CLIENT_SECRET')
 class Config:
     """Contains all the app configuration variables.
     """
+    CELERY_BROKER_URL = "redis://localhost:6379/0"
+    RESULT_BACKEND = "redis://localhost:6379/0"
+
     SQLALCHEMY_DATABASE_URI = f"postgresql://{username}:{password}@{host}:{port}/{database}"
 
     PROPAGATE_EXCEPTIONS = True
@@ -45,4 +48,9 @@ class Config:
 
     GITHUB_CLIENT_ID = GITHUB_CLIENT_ID
     GITHUB_CLIENT_SECRET = GITHUB_CLIENT_SECRET
-    
+
+    MAIL_SERVER = 'smtp.googlemail.com'
+    MAIL_PORT = 587
+    MAIL_USE_TLS = True
+    MAIL_USERNAME = os.environ.get('EMAIL_USER')
+    MAIL_PASSWORD = os.environ.get('EMAIL_PASSWORD')

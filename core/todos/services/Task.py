@@ -1,4 +1,3 @@
-from core import db
 from core.constants import CONTENT_NOT_FOUND_MESSAGE, DELETE_SUCCESSFUL_MESSAGE, CHANGED_TO_PARENT_TASK_SUCCESS, \
     CHANGED_TO_PARENT_TASK_FAILED, TASK_NOT_FOUND, SWITCH_LIST_FAILED, SWITCH_LIST_SUCCESS, LIST_NOT_FOUND
 from core.todos.schemas import TaskSchema, TaskUpdateSchema
@@ -7,6 +6,7 @@ from core.todos.models import Task, TaskList
 from flask import make_response
 from http import HTTPStatus
 from flask_jwt_extended import current_user
+from ..tasks import send_creation_mail
 
 task_schema = TaskSchema()
 task_update_request_schema = TaskUpdateSchema(partial=True)
@@ -63,6 +63,7 @@ class TaskServices:
         if is_valid:
             response = Task.save(data_or_errors)
             json_response = task_schema.dump(response)
+            send_creation_mail.delay(current_user.email)
             return make_response(json_response, HTTPStatus.CREATED)
 
         return make_response(data_or_errors, HTTPStatus.BAD_REQUEST)
