@@ -1,3 +1,5 @@
+from authlib.integrations.base_client import OAuthError
+
 from core.social_auth.oauth import oauth
 from core.social_auth.constants import GOOGLE_USERINFO_URL
 from werkzeug.exceptions import Unauthorized, BadRequest, InternalServerError
@@ -34,6 +36,8 @@ class GoogleAuth:
                 response = client.get(GOOGLE_USERINFO_URL, params={'skip_status': True})
             except RequestException as e:
                 raise InternalServerError(f"Server failed to fetch detailed from {GOOGLE_USERINFO_URL}")
+            except OAuthError as error:
+                raise InternalServerError(f"Server failed to fetch detailed from {GOOGLE_USERINFO_URL}, errors: {error.error}")
 
             data = response.json()
             if response.status_code == 401:

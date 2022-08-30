@@ -32,3 +32,11 @@ oauth.register(
     client_kwargs={'scope': 'user:email'},
     userinfo_endpoint='https://api.github.com/user'
 )
+
+oauth.register(
+    name='facebook',
+    access_token_url='https://graph.facebook.com/oauth/access_token',
+    authorize_url='https://www.facebook.com/dialog/oauth',
+    api_base_url='https://graph.facebook.com/',
+    client_kwargs={'scope': 'email'},
+)

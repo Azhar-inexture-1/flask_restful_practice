@@ -11,9 +11,6 @@ from http import HTTPStatus
 from .utils import Hasher
 from .jwt_utils import JWTAuthentication
 from flask_jwt_extended import get_jwt_identity
-from core.social_auth.google.services import GoogleAuth
-from core.social_auth.twitter.services import TwitterAuth
-from core.social_auth.github.services import GithubAuth
 
 user_schema = UserRequestSchema()
 user_register_response_schema = UserSchema(load_only=('password',))
@@ -25,9 +22,6 @@ class UserServices:
 
     def __init__(self, request):
         self.request = request
-        self.google = GoogleAuth(request)
-        self.twitter = TwitterAuth(request)
-        self.github = GithubAuth(request)
 
     def register(self):
         """
@@ -87,29 +81,6 @@ class UserServices:
             }, HTTPStatus.OK)
         return make_response(data_or_errors, HTTPStatus.BAD_REQUEST)
 
-    def oauth(self, name):
-        if name == 'google':
-            response = self.google.auth()
-        elif name == 'twitter':
-            response = self.twitter.auth()
-        elif name == 'github':
-            response = self.github.auth()
-
-        data = {'email': response.get('email'), 'account_id': str(response.get('id')), 'provider': name}
-        # validating and storing userinfo to database
-        is_valid, data_or_errors = Serializer.load(data, social_auth_user_schema)
-        if is_valid:
-            user = OAuthUser.auth(data_or_errors)
-            tokens = JWTAuthentication(user.id).get_tokens_for_user()
-            response_data = Serializer.dump(data=user,
-                                            schema=user_login_response_schema,
-                                            extra_args=tokens)
-            return make_response({
-                "message": MSG_LOG_IN_SUCCESSFULLY,
-                "data": response_data
-            }, HTTPStatus.OK)
-        return make_response(data_or_errors, HTTPStatus.BAD_REQUEST)
-
     def login(self):
         """
         This function handles the login of user.
@@ -151,3 +122,23 @@ class UserServices:
                 "message": "Successful.",
                 "access_token": access_token
             }, HTTPStatus.OK)
+
+
+class SocialAuth:
+
+    @staticmethod
+    def save_to_db(response, name):
+        data = {'email': response.get('email'), 'account_id': str(response.get('id')), 'provider': name}
+        # validating and storing userinfo to database
+        is_valid, data_or_errors = Serializer.load(data, social_auth_user_schema)
+        if is_valid:
+            user = OAuthUser.auth(data_or_errors)
+            tokens = JWTAuthentication(user.id).get_tokens_for_user()
+            response_data = Serializer.dump(data=user,
+                                            schema=user_login_response_schema,
+                                            extra_args=tokens)
+            return make_response({
+                "message": MSG_LOG_IN_SUCCESSFULLY,
+                "data": response_data
+            }, HTTPStatus.OK)
+        return make_response(data_or_errors, HTTPStatus.BAD_REQUEST)

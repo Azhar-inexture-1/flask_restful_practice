@@ -89,12 +89,10 @@ def create_app(config_class=Config):
         from core.todos.routes import tasks_blueprint
         from core.users.routes import users_blueprint
 
-        # from core.social_auth.google.routes import google_blueprint
-        # from core.social_auth.twitter.routes import twitter_blueprint
+        from core.users.social_auth_routes import social_auth_blueprint
 
         app.register_blueprint(tasks_blueprint)
         app.register_blueprint(users_blueprint)
-        # app.register_blueprint(google_blueprint)
-        # app.register_blueprint(twitter_blueprint)
+        app.register_blueprint(social_auth_blueprint)
 
         return app

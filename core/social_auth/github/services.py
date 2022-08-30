@@ -2,6 +2,7 @@ from core.social_auth.oauth import oauth
 from core.social_auth.constants import GITHUB_USERINFO_URL, GITHUB_EMAIL_URL
 from werkzeug.exceptions import Unauthorized, BadRequest, InternalServerError
 from requests.exceptions import RequestException
+from authlib.integrations.flask_client import OAuthError
 
 
 class GithubAuth:
@@ -52,7 +53,8 @@ class GithubAuth:
                 response = self.client.get(GITHUB_USERINFO_URL, params={'skip_status': True})
             except RequestException as e:
                 raise InternalServerError(f"Server failed to fetch detailed from {GITHUB_USERINFO_URL}")
-
+            except OAuthError as error:
+                raise InternalServerError(f"Server failed to fetch detailed from {GITHUB_USERINFO_URL}, errors: {error.error}")
             data = response.json()
             if response.status_code == 401:
                 raise Unauthorized(data)

@@ -21,6 +21,9 @@ TWITTER_CLIENT_SECRET = os.environ.get('TWITTER_CLIENT_SECRET')
 GITHUB_CLIENT_ID = os.environ.get('GITHUB_CLIENT_ID')
 GITHUB_CLIENT_SECRET = os.environ.get('GITHUB_CLIENT_SECRET')
 
+FACEBOOK_CLIENT_ID = os.environ.get('FACEBOOK_CLIENT_ID')
+FACEBOOK_CLIENT_SECRET = os.environ.get('FACEBOOK_CLIENT_SECRET')
+
 
 class Config:
     """Contains all the app configuration variables.
@@ -54,3 +57,6 @@ class Config:
     MAIL_USE_TLS = True
     MAIL_USERNAME = os.environ.get('EMAIL_USER')
     MAIL_PASSWORD = os.environ.get('EMAIL_PASSWORD')
+
+    FACEBOOK_CLIENT_ID = FACEBOOK_CLIENT_ID
+    FACEBOOK_CLIENT_SECRET = FACEBOOK_CLIENT_SECRET

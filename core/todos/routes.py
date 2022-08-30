@@ -22,11 +22,6 @@ class TaskResources(Resource):
         Return
         ------
         """
-        print("hello")
-        current_app.logger.warning("Get all user tasks warning")
-        current_app.logger.error("Get all user tasks error")
-        current_app.logger.info("Get all user tasks info")
-        current_app.logger.debug("Get all user tasks debug")
         return cls.task_services.get() if id is None else cls.task_services.get_by_id(id)
 
     @classmethod
