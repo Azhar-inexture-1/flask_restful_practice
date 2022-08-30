@@ -115,7 +115,7 @@ class Task(db.Model):
         ------
         tuple of model objects.
         """
-        return cls.query.filter_by(parent=None).all()
+        return cls.query.filter_by(parent=None, user_id=user_id).all()
 
     @classmethod
     def save(cls, data):

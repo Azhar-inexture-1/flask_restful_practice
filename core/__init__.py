@@ -11,6 +11,7 @@ from flask_mail import Mail
 from flask.logging import default_handler
 from logging.config import dictConfig
 
+# custom logging config
 dictConfig(
     {
         'version': 1,
@@ -83,7 +84,7 @@ def create_app(config_class=Config):
     mail.init_app(app)
     celery.conf.update(app.config)
 
-    app.logger.removeHandler(default_handler)
+    # app.logger.removeHandler(default_handler)
 
     with app.app_context():
         from core.todos.routes import tasks_blueprint

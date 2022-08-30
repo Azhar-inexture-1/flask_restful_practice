@@ -1,5 +1,5 @@
 from core import marshmallow
-from .models import User
+from .models import User, OAuthUser
 from core.constants import PASSWORD_REGEX
 from marshmallow.validate import Regexp
 from marshmallow import fields
@@ -36,3 +36,12 @@ class SocialAuthUserSchema(marshmallow.SQLAlchemyAutoSchema):
     provider = fields.Str(required=True)
     account_id = fields.Str(allow_none=True)
     email = fields.Email(allow_none=True)
+
+
+class OAuthUserSchema(marshmallow.SQLAlchemyAutoSchema):
+    """
+    Serializer for social authentication of user.
+    """
+    class Meta:
+        model = OAuthUser
+        include_fk = True

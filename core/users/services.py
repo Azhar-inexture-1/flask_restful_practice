@@ -1,21 +1,22 @@
 from core.constants import (
     ERR_PASSWORD_INCORRECT, ERR_USER_WITH_EMAIL_NOT_EXISTS,
-    MSG_LOG_IN_SUCCESSFULLY, USER_INFO_URL
+    MSG_LOG_IN_SUCCESSFULLY, USER_INFO_URL, DELETE_SUCCESSFUL_MESSAGE, CONTENT_NOT_FOUND_MESSAGE
 )
 from core.social_auth.oauth import oauth
-from .schemas import UserSchema, UserRequestSchema, SocialAuthUserSchema
+from .schemas import UserSchema, UserRequestSchema, SocialAuthUserSchema, OAuthUserSchema
 from core.utils import Serializer
 from .models import User, OAuthUser
 from flask import make_response
 from http import HTTPStatus
 from .utils import Hasher
 from .jwt_utils import JWTAuthentication
-from flask_jwt_extended import get_jwt_identity
+from flask_jwt_extended import get_jwt_identity, current_user
 
 user_schema = UserRequestSchema()
 user_register_response_schema = UserSchema(load_only=('password',))
 user_login_response_schema = UserSchema(load_only=('password', 'created_at'))
 social_auth_user_schema = SocialAuthUserSchema()
+social_oauth_user_schema = OAuthUserSchema()
 
 
 class UserServices:
@@ -63,23 +64,8 @@ class UserServices:
             if response.status_code != 200:
                 return make_response(response_data, HTTPStatus.BAD_REQUEST)
 
-            data = {'email': response_data.get('email'), 'account_id': str(response_data.get('id'))}
-
-        data['provider'] = name
-
         # validating and storing userinfo to database
-        is_valid, data_or_errors = Serializer.load(data, social_auth_user_schema)
-        if is_valid:
-            user = OAuthUser.auth(data_or_errors)
-            tokens = JWTAuthentication(user.id).get_tokens_for_user()
-            response_data = Serializer.dump(data=user,
-                                            schema=user_login_response_schema,
-                                            extra_args=tokens)
-            return make_response({
-                "message": MSG_LOG_IN_SUCCESSFULLY,
-                "data": response_data
-            }, HTTPStatus.OK)
-        return make_response(data_or_errors, HTTPStatus.BAD_REQUEST)
+        return self.save_to_db(data, name)
 
     def login(self):
         """
@@ -123,13 +109,10 @@ class UserServices:
                 "access_token": access_token
             }, HTTPStatus.OK)
 
-
-class SocialAuth:
-
     @staticmethod
     def save_to_db(response, name):
+        """ validating and storing userinfo to database"""
         data = {'email': response.get('email'), 'account_id': str(response.get('id')), 'provider': name}
-        # validating and storing userinfo to database
         is_valid, data_or_errors = Serializer.load(data, social_auth_user_schema)
         if is_valid:
             user = OAuthUser.auth(data_or_errors)
@@ -142,3 +125,33 @@ class SocialAuth:
                 "data": response_data
             }, HTTPStatus.OK)
         return make_response(data_or_errors, HTTPStatus.BAD_REQUEST)
+
+    @staticmethod
+    def get_connected_oauth():
+        """
+        Calls the model get method and Serializes in required formate response.
+        Return
+        ------
+        JSON Response, HTTP status code
+        """
+        data = OAuthUser.get(current_user.id)
+        json_response = social_oauth_user_schema.dump(data, many=True)
+        return make_response(json_response, HTTPStatus.OK)
+
+    @staticmethod
+    def delete_connected_oauth(id):
+        """
+        Calls the model's delete method.
+        Parameter
+        ---------
+        id: id of the task
+        Return
+        ------
+        JSON Response, HTTP status code
+        """
+        oauth_account = OAuthUser.get_by_id(id, current_user.id)
+        if oauth_account:
+            oauth_account.delete()
+            return make_response(DELETE_SUCCESSFUL_MESSAGE, HTTPStatus.NO_CONTENT)
+
+        return make_response(CONTENT_NOT_FOUND_MESSAGE, HTTPStatus.NOT_FOUND)

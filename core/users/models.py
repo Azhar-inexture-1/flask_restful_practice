@@ -2,8 +2,6 @@ from core import db
 from datetime import datetime
 from .utils import Hasher
 from core.social_auth.models import OAuthMixin
-from ..constants import PASSWORD_LOGIN_REQUIRED, oauth_login_mismatch
-from werkzeug.exceptions import BadRequest
 
 
 class User(db.Model):
@@ -81,6 +79,37 @@ class OAuthUser(OAuthMixin, db.Model):
         self.user_id = user_id
 
     @classmethod
+    def get(cls, user_id):
+        """
+        This method fetch all tasks.
+        return
+        ------
+        tuple of model objects.
+        """
+        return cls.query.filter_by(user_id=user_id).all()
+
+    @classmethod
+    def get_by_id(cls, id, user_id):
+        """
+        This method fetch task by id.
+        Parameter
+        ---------
+        id: id of task
+        return
+        ------
+        model object or None.
+        """
+        return cls.query.filter_by(id=id, user_id=user_id).first()
+
+    def delete(self):
+        """
+        Deletes the objects.
+        """
+        db.session.delete(self)
+        db.session.commit()
+        return None
+
+    @classmethod
     def auth(cls, data):
         """
         Handles social auth, returns proper responses for user request.
@@ -94,25 +123,18 @@ class OAuthUser(OAuthMixin, db.Model):
             example: "google", "github", "twitter" etc.
         return
         ------
-        Status true or false, message, model object or none
+        user object
         """
         email = data.get('email')
-        provider = data.get('provider')
         account_id = data.get('account_id')
         user = None
         if email:
             user = User.query.filter_by(email=email).first()
         elif account_id:
             user = User.query.filter_by(oauth_account_id=account_id).first()
-        if user:
-            oauth_user = cls.query.filter_by(user_id=user.id).first()
-            if not oauth_user:
-                raise BadRequest(PASSWORD_LOGIN_REQUIRED)
-            if oauth_user.provider != provider:
-                raise BadRequest(oauth_login_mismatch(oauth_user.provider))
-        else:
+        if not user:
             user = User.save_social(data)
-            oauth_user = cls(data, user.id)
-            db.session.add(oauth_user)
-            db.session.commit()
+        oauth_user = cls(data, user.id)
+        db.session.add(oauth_user)
+        db.session.commit()
         return user

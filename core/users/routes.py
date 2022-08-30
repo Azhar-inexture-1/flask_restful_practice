@@ -102,7 +102,41 @@ class RefreshToken(Resource):
 #         return cls.auth_service.oauth(name)
 
 
+class ConnectedSocialAuth(Resource):
+    """
+    Generates new access token.
+    Authorization is done using the refresh token.
+    """
+
+    user_service = UserServices(request)
+
+    @classmethod
+    @jwt_required()
+    def get(cls):
+        """
+        This is called when request method is post.
+        Parameter
+        ---------
+        Return
+        ------
+        """
+        return cls.user_service.get_connected_oauth()
+
+    @classmethod
+    @jwt_required()
+    def delete(cls, id):
+        """
+        This is called when request method is post.
+        Parameter
+        ---------
+        Return
+        ------
+        """
+        return cls.user_service.delete_connected_oauth(id)
+
+
 users_api.add_resource(RegisterUser, '/register')
 # users_api.add_resource(SocialAuthUser, '/auth/<string:name>')
 users_api.add_resource(LoginUser, '/login')
 users_api.add_resource(RefreshToken, '/refresh')
+users_api.add_resource(ConnectedSocialAuth, '/connected_oauth', '/connected_oauth/<int:id>')

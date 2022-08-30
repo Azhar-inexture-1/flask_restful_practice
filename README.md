@@ -72,7 +72,7 @@ PONG
 ```
 
 ### Start a celery worker
-You'll need a worker to get things done, run the following command in a separate terminal tab:
+You'll need a worker to get things done, run the following command in a separate terminal tab
 
 ```bash
 celery worker -A celery_worker.celery --loglevel=info
@@ -80,7 +80,7 @@ celery worker -A celery_worker.celery --loglevel=info
 
 ### Start the app.
 
-Open a new terminal tab and start the app:
+Open a new terminal tab and start the app
 
 ```bash
 python run.py
