@@ -10,6 +10,7 @@ from celery import Celery
 from flask_mail import Mail
 from flask.logging import default_handler
 from logging.config import dictConfig
+from flask_filter import FlaskFilter
 
 # custom logging config
 dictConfig(
@@ -63,6 +64,7 @@ jwt = JWTManager()
 bcrypt = Bcrypt()
 oauth = OAuth()
 mail = Mail()
+query_filter = FlaskFilter()
 
 """ Instantiate Celery, celery uses lowercase in loading the config variables,
     while flask only considers uppercase variables as config,
@@ -82,6 +84,7 @@ def create_app(config_class=Config):
     bcrypt.init_app(app)
     oauth.init_app(app)
     mail.init_app(app)
+    query_filter.init_app(app)
     celery.conf.update(app.config)
 
     # app.logger.removeHandler(default_handler)
