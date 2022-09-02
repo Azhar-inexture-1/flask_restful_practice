@@ -8,7 +8,6 @@ from flask_bcrypt import Bcrypt
 from authlib.integrations.flask_client import OAuth
 from celery import Celery
 from flask_mail import Mail
-from flask.logging import default_handler
 from logging.config import dictConfig
 from flask_filter import FlaskFilter
 
@@ -86,8 +85,6 @@ def create_app(config_class=Config):
     mail.init_app(app)
     query_filter.init_app(app)
     celery.conf.update(app.config)
-
-    # app.logger.removeHandler(default_handler)
 
     with app.app_context():
         from core.todos.routes import tasks_blueprint

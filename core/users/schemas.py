@@ -17,14 +17,9 @@ class UserRequestSchema(marshmallow.Schema):
     """
     User login request serializer.
     """
-    email = fields.Email(required=True, error=f"Please Enter Valid Email Address!")
+    email = fields.Email(required=True, error="Please Enter Valid Email Address!")
     # noinspection PyTypeChecker
-    password = fields.Str(
-                            required=True,
-                            validate=Regexp(
-                                PASSWORD_REGEX, error=f"Please Enter valid Password!"
-                            )
-                        )
+    password = fields.Str(required=True, validate=Regexp(PASSWORD_REGEX, error="Please Enter valid Password!"))
 
 
 class SocialAuthUserSchema(marshmallow.SQLAlchemyAutoSchema):

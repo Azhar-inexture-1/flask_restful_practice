@@ -80,7 +80,7 @@ class TaskList(db.Model):
         return None
 
     def __repr__(self):
-        return '<{} (id={})>'.format(type(self).__name__, self.id)
+        return f'<{type(self).__name__} (id={self.id})>'
 
 
 class Task(db.Model):
@@ -185,4 +185,4 @@ class Task(db.Model):
         return self
 
     def __repr__(self):
-        return '<{} (id={})>'.format(type(self).__name__, self.id)
+        return f'<{type(self).__name__} (id={self.id})>'

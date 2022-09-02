@@ -31,3 +31,9 @@ CHANGED_TO_PARENT_TASK_SUCCESS = "Task is successfully changed to parent task."
 CHANGED_TO_PARENT_TASK_FAILED = {"message": "Task is already a parent task."}
 SWITCH_LIST_SUCCESS = "Task is successfully switched to the given list."
 SWITCH_LIST_FAILED = {"message": "Task is already in the same list."}
+
+FILTER_MAP = {
+    'title': 'like',
+    'due_date': '=',
+    'completed': '='
+}

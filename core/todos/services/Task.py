@@ -1,15 +1,21 @@
-from core.constants import CONTENT_NOT_FOUND_MESSAGE, DELETE_SUCCESSFUL_MESSAGE, CHANGED_TO_PARENT_TASK_SUCCESS, \
-    CHANGED_TO_PARENT_TASK_FAILED, TASK_NOT_FOUND, SWITCH_LIST_FAILED, SWITCH_LIST_SUCCESS, LIST_NOT_FOUND
-from core.todos.schemas import TaskSchema, TaskUpdateSchema
+from marshmallow import ValidationError
+from core.constants import (CONTENT_NOT_FOUND_MESSAGE, DELETE_SUCCESSFUL_MESSAGE,
+                            CHANGED_TO_PARENT_TASK_SUCCESS, CHANGED_TO_PARENT_TASK_FAILED,
+                            TASK_NOT_FOUND, SWITCH_LIST_FAILED,
+                            SWITCH_LIST_SUCCESS, LIST_NOT_FOUND)
+from core.todos.schemas import TaskSchema, TaskUpdateSchema, TaskFilterSchema
 from core.utils import Serializer
 from core.todos.models import Task, TaskList
 from flask import make_response
 from http import HTTPStatus
 from flask_jwt_extended import current_user
+
+from .filters import filter_tasks
 from ..tasks import send_creation_mail
 
 task_schema = TaskSchema()
 task_update_request_schema = TaskUpdateSchema(partial=True)
+task_filter_schema = TaskFilterSchema()
 
 
 class TaskServices:
@@ -21,17 +27,22 @@ class TaskServices:
     def __init__(self, request):
         self.request = request
 
-    @staticmethod
-    def get():
+    # @staticmethod
+    def get(self):
         """
         Calls the model get method and Serializes in required formate response.
         Return
         ------
         JSON Response, HTTP status code
         """
-        data = Task.get(current_user.id)
-        json_response = task_schema.dump(data, many=True)
-        return make_response(json_response, HTTPStatus.OK)
+        values = self.request.args.to_dict()
+        try:
+            data = filter_tasks(current_user.id, values)
+        except KeyError as e:
+            return make_response({"error": f'Invalid field {e}'}, HTTPStatus.BAD_REQUEST)
+        except ValidationError as e:
+            return make_response(e.messages, HTTPStatus.BAD_REQUEST)
+        return task_filter_schema.dump(data, many=True), 200
 
     @staticmethod
     def get_by_id(id):
@@ -102,8 +113,7 @@ class TaskServices:
         ------
         JSON Response, HTTP status code
         """
-        task = Task.get_by_id(id, current_user.id)
-        if task:
+        if task := Task.get_by_id(id, current_user.id):
             task.delete()
             return make_response(DELETE_SUCCESSFUL_MESSAGE, HTTPStatus.NO_CONTENT)
 
@@ -111,14 +121,13 @@ class TaskServices:
 
     @classmethod
     def make_parent(cls, id):
-        task = Task.get_by_id(id, current_user.id)
-        if task:
+        if task := Task.get_by_id(id, current_user.id):
             if task.parent_id:
                 response = task.make_parent()
                 json_response = Serializer.dump(data=response, schema=task_schema)
                 return make_response({"message": CHANGED_TO_PARENT_TASK_SUCCESS, "data": json_response}, HTTPStatus.OK)
-            return make_response(CHANGED_TO_PARENT_TASK_FAILED, HTTPStatus.BAD_REQUEST)
 
+            return make_response(CHANGED_TO_PARENT_TASK_FAILED, HTTPStatus.BAD_REQUEST)
         return make_response(TASK_NOT_FOUND, HTTPStatus.NOT_FOUND)
 
     @classmethod
@@ -136,4 +145,3 @@ class TaskServices:
             return make_response({"message": SWITCH_LIST_SUCCESS, "data": json_response}, HTTPStatus.OK)
 
         return make_response(SWITCH_LIST_FAILED, HTTPStatus.BAD_REQUEST)
-

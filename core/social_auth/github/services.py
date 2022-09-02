@@ -24,13 +24,7 @@ class GithubAuth:
             raise Unauthorized(data)
         elif response.status_code != 200:
             raise BadRequest(data)
-
-        email = None
-        for item in data:
-            if item['primary']:
-                email = item['email']
-                break
-        return email
+        return next((item['email'] for item in data if item['primary']), None)
 
     def get_data(self):
         """
@@ -74,5 +68,4 @@ class GithubAuth:
         Return
         ------
         """
-        data = self.get_data()
-        return data
+        return self.get_data()

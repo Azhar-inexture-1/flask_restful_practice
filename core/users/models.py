@@ -65,7 +65,7 @@ class User(db.Model):
         return cls.query.filter_by(email=email).first()
 
     def __repr__(self):
-        return '<{} (id: {})>'.format(type(self).__name__, self.id)
+        return f'<{type(self).__name__} (id: {self.id})>'
 
 
 class OAuthUser(OAuthMixin, db.Model):

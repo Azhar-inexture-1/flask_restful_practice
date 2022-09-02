@@ -149,8 +149,7 @@ class UserServices:
         ------
         JSON Response, HTTP status code
         """
-        oauth_account = OAuthUser.get_by_id(id, current_user.id)
-        if oauth_account:
+        if oauth_account := OAuthUser.get_by_id(id, current_user.id):
             oauth_account.delete()
             return make_response(DELETE_SUCCESSFUL_MESSAGE, HTTPStatus.NO_CONTENT)
 

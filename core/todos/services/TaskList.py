@@ -84,7 +84,8 @@ class TaskListServices:
                 json_response = task_list_schema.dump(response)
                 return make_response(json_response, HTTPStatus.OK)
 
-        return make_response(data_or_errors, HTTPStatus.BAD_REQUEST)
+            return make_response(data_or_errors, HTTPStatus.BAD_REQUEST)
+        return make_response(CONTENT_NOT_FOUND_MESSAGE, HTTPStatus.BAD_REQUEST)
 
     @staticmethod
     def delete(id):
@@ -97,9 +98,7 @@ class TaskListServices:
         ------
         JSON Response, HTTP status code
         """
-        task = TaskList.get_by_id(id, current_user.id)
-        if task:
+        if task := TaskList.get_by_id(id, current_user.id):
             task.delete()
             return make_response(DELETE_SUCCESSFUL_MESSAGE, HTTPStatus.NO_CONTENT)
-
         return make_response(CONTENT_NOT_FOUND_MESSAGE, HTTPStatus.BAD_REQUEST)

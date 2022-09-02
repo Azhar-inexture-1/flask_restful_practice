@@ -54,5 +54,4 @@ class GoogleAuth:
         Return
         ------
         """
-        data = self.get_data()
-        return data
+        return self.get_data()
