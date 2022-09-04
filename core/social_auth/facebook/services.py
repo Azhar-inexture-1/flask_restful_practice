@@ -1,4 +1,6 @@
 from authlib.integrations.base_client import OAuthError
+from flask import request
+
 from core.social_auth.oauth import oauth
 from core.social_auth.constants import FACEBOOK_USERINFO_ENDPOINT
 from werkzeug.exceptions import Unauthorized, BadRequest, InternalServerError
@@ -6,11 +8,10 @@ from requests.exceptions import RequestException
 
 
 class FacebookAuth:
+    NAME = "facebook"
 
-    def __init__(self, request):
-        self.request = request
-
-    def get_data(self):
+    @staticmethod
+    def get_data():
         """
         This function fetches the data from facebook API.
         Parameter
@@ -23,7 +24,7 @@ class FacebookAuth:
         if client is None:
             raise BadRequest("Facebook is not registered for oauth in the backend.")
 
-        token = self.request.get_json(force=True, silent=True).get('token')
+        token = request.get_json(force=True, silent=True).get('token')
         if token is None:
             raise BadRequest("The Token is not provided.")
 

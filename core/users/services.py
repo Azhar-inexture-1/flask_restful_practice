@@ -11,12 +11,14 @@ from http import HTTPStatus
 from .utils import Hasher
 from .jwt_utils import JWTAuthentication
 from flask_jwt_extended import get_jwt_identity, current_user
+from ..social_auth import _get_oauth_class
 
 user_schema = UserRequestSchema()
 user_register_response_schema = UserSchema(load_only=('password',))
 user_login_response_schema = UserSchema(load_only=('password', 'created_at'))
 social_auth_user_schema = SocialAuthUserSchema()
 social_oauth_user_schema = OAuthUserSchema()
+
 
 
 class UserServices:
@@ -108,6 +110,22 @@ class UserServices:
                 "message": "Successful.",
                 "access_token": access_token
             }, HTTPStatus.OK)
+
+    def oauth(self, name):
+        """
+        This function handles social logins.
+        Parameter
+        ---------
+        name: String
+            Name of the oauth provider
+            example: "google", "twitter", etc.
+        """
+        OAuthClass = _get_oauth_class(name)
+        oauth = OAuthClass()
+        data = oauth.auth()
+
+        # validating and storing userinfo to database
+        return self.save_to_db(data, name)
 
     @staticmethod
     def save_to_db(response, name):

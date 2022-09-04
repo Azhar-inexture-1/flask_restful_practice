@@ -67,27 +67,27 @@ class RefreshToken(Resource):
         return cls.user_service.refresh_token()
 
 
-# class SocialAuthUser(Resource):
-#     """
-#     Route handle social login and registrations.
-#     """
-#     auth_service = UserServices(request)
-#
-#     @classmethod
-#     def post(cls, name):
-#         """
-#         This is called when request method is post.
-#         Parameter
-#         ---------
-#         name: string
-#             Name of the oauth provider
-#             example:
-#                 "google", "facebook", etc.
-#         Return
-#         ------
-#         """
-#         # return cls.auth_service.social_auth(name)
-#         return cls.auth_service.oauth(name)
+class SocialAuthUser(Resource):
+    """
+    Route handle social login and registrations.
+    """
+    auth_service = UserServices(request)
+
+    @classmethod
+    def post(cls, name):
+        """
+        This is called when request method is post.
+        Parameter
+        ---------
+        name: string
+            Name of the oauth provider
+            example:
+                "google", "facebook", etc.
+        Return
+        ------
+        """
+        # return cls.auth_service.social_auth(name)
+        return cls.auth_service.oauth(name)
 
 
 class ConnectedSocialAuth(Resource):
@@ -126,7 +126,7 @@ class ConnectedSocialAuth(Resource):
 
 
 users_api.add_resource(RegisterUser, '/register')
-# users_api.add_resource(SocialAuthUser, '/auth/<string:name>')
+users_api.add_resource(SocialAuthUser, '/auth/<string:name>')
 users_api.add_resource(LoginUser, '/login')
 users_api.add_resource(RefreshToken, '/refresh')
 users_api.add_resource(ConnectedSocialAuth, '/connected_oauth', '/connected_oauth/<int:id>')

@@ -5,16 +5,19 @@ from core.social_auth.github.services import GithubAuth
 from core.social_auth.twitter.services import TwitterAuth
 from flask_restful import Api, Resource
 from .services import UserServices
+from ..social_auth import OAuths
 
 social_auth_blueprint = Blueprint("social_auth", __name__)
 social_auth_api = Api(social_auth_blueprint)
+
+__OAUTH_MAP = {c.OP: c for c in OAuths}
 
 
 class Facebook(Resource):
     """
     Route handle facebook login and registrations.
     """
-    social_auth = FacebookAuth(request)
+    social_auth = FacebookAuth()
 
     @classmethod
     def post(cls):
@@ -33,7 +36,7 @@ class Google(Resource):
     """
     Route handle google login and registrations.
     """
-    social_auth = GoogleAuth(request)
+    social_auth = GoogleAuth()
 
     @classmethod
     def post(cls):
@@ -52,7 +55,7 @@ class Twitter(Resource):
     """
     Route handle twitter login and registrations.
     """
-    social_auth = TwitterAuth(request)
+    social_auth = TwitterAuth()
 
     @classmethod
     def post(cls):
@@ -71,7 +74,7 @@ class Github(Resource):
     """
     Route handle GitHub login and registrations.
     """
-    social_auth = GithubAuth(request)
+    social_auth = GithubAuth()
 
     @classmethod
     def post(cls):

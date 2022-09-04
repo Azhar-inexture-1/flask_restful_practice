@@ -4,14 +4,14 @@ from core.social_auth.oauth import oauth
 from core.social_auth.constants import GOOGLE_USERINFO_URL
 from werkzeug.exceptions import Unauthorized, BadRequest, InternalServerError
 from requests.exceptions import RequestException
+from flask import request
 
 
 class GoogleAuth:
+    NAME = "google"
 
-    def __init__(self, request):
-        self.request = request
-
-    def get_data(self):
+    @staticmethod
+    def get_data():
         """
         This function fetches the data from google API.
         Parameter
@@ -24,7 +24,7 @@ class GoogleAuth:
         if client is None:
             raise BadRequest("Google is not registered for oauth in the backend.")
 
-        token = self.request.get_json(force=True, silent=True).get('token')
+        token = request.get_json(force=True, silent=True).get('token')
         if token is None:
             raise BadRequest("The Token is not provided.")
 

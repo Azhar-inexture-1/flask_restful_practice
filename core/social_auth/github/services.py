@@ -3,12 +3,13 @@ from core.social_auth.constants import GITHUB_USERINFO_URL, GITHUB_EMAIL_URL
 from werkzeug.exceptions import Unauthorized, BadRequest, InternalServerError
 from requests.exceptions import RequestException
 from authlib.integrations.flask_client import OAuthError
+from flask import request
 
 
 class GithubAuth:
+    NAME = "github"
 
-    def __init__(self, request):
-        self.request = request
+    def __init__(self):
         self.client = oauth.create_client("github")
         if not self.client:
             raise BadRequest("Github is not register for oauth in the backend.")
@@ -35,7 +36,7 @@ class GithubAuth:
         ------
         data: dict
         """
-        token = self.request.get_json(force=True, silent=True).get('token')
+        token = request.get_json(force=True, silent=True).get('token')
         if not token:
             raise BadRequest("The Token is not provided.")
 

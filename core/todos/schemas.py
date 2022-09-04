@@ -106,7 +106,6 @@ class TaskListSchema(marshmallow.SQLAlchemyAutoSchema):
     # tasks = fields.Nested(TaskFilterSchema, many=True)
 
     def get_tasks(self, obj):
-        print(obj.id)
         filters = [{"field": 'parent_id', "op": '=', "value": None}, {"field": "list_id", "op": '=', "value": obj.id}]
         values = request.args.to_dict()
         for value in values:
